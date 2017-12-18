@@ -16,4 +16,34 @@ It's a fork that makes `encoding/json` better for users.
 
 `github.com/koki/json` is a drop-in replacement for `encoding/json`. The decoder implementation is different, but the library API remains unchanged. Use this package's `json.Unmarshal` if you want paths for your decoder errors. Use `json.Marshal` if you want to omit zero-valued structs.
 
+```go
+// Deserialize
+foo := Foo{}
+err := json.Unmarshal(data, &foo)
+...
+
+// Serialize
+bar := Bar{}
+data, err := json.Marshal(bar)
+...
+```
+
 `github.com/koki/json/jsonutil` is a brand-new package. Use `jsonutil.ExtraneousFieldPaths` to get a list of paths that weren't decoded into your Go object. i.e. potential typos.
+
+```go
+// 1. Parse.
+obj := map[string]interface{}
+parsedObj := Foo{}
+err := json.Unmarshal(data, &obj)
+...
+err = jsonutil.UnmarshalMap(obj, &parsedObj)
+...
+
+// 2. Check for unparsed fields--potential typos.
+extraneousPaths, err := jsonutil.ExtraneousFieldPaths(obj, parsedObj)
+...
+if len(extraneousPaths) > 0 {
+    return nil, &jsonutil.ExtraneousFieldsError{Paths: extraneousPaths}
+}
+...
+```
